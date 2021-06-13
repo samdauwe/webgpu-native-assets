@@ -24,23 +24,22 @@ const float ambientFactor = 0.2;
 void main() {
   // Percentage-closer filtering. Sample texels in the region
   // to smooth the result.
-  float shadowFactor = 0.0;
+  float visibility = 0.0;
   for (int y = -1 ; y <= 1 ; y++) {
       for (int x = -1 ; x <= 1 ; x++) {
         vec2 offset = vec2(
           x * (1.0 / SHADOW_DEPTH_TEXTURE_SIZE),
           y * (1.0 / SHADOW_DEPTH_TEXTURE_SIZE));
 
-        shadowFactor += texture(
+        visibility += texture(
           sampler2DShadow(shadowMap, shadowSampler),
           vec3(shadowPos.xy + offset, shadowPos.z - 0.007));
       }
   }
+  visibility = visibility / 9.0;
 
-  shadowFactor = ambientFactor + shadowFactor / 9.0;
+  float lambertFactor = max(dot(normalize(scene.lightPos - fragPos), fragNorm), 0.0);
 
-  float lambertFactor = abs(dot(normalize(scene.lightPos - fragPos), fragNorm));
-
-  float lightingFactor = min(shadowFactor * lambertFactor, 1.0);
+  float lightingFactor = min(ambientFactor + visibility * lambertFactor, 1.0);
   outColor = vec4(lightingFactor * albedo, 1.0);
 }
