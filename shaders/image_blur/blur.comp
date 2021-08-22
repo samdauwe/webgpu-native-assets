@@ -1,7 +1,7 @@
 #version 450
 
 // These should match the constants defined in image_blur.c
-#define TILE_DIM 256
+#define TILE_DIM 128
 #define BATCH_0 4
 #define BATCH_1 4
 
