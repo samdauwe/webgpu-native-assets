@@ -2,6 +2,8 @@
 
 #version 450
 
+#define WGSL
+
 layout (local_size_x = 16, local_size_y = 16) in;
 layout (binding = 0, rgba8) uniform writeonly image2D resultImage;
 
@@ -44,6 +46,9 @@ struct Plane
 	vec3 diffuse;
 	float specular;
 	int id;
+#ifdef WGSL
+	int padding; // Added to make size of Sphere struct different from Plane struct
+#endif
 };
 
 layout (std140, binding = 2) buffer Spheres
