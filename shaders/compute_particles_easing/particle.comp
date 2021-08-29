@@ -1,0 +1,160 @@
+#version 450
+
+#define PARTICLE_NUM 60000
+
+struct Info {
+    float startValue;
+    float endValue;
+    float easeType;
+    float value;
+};
+
+struct InfoGroup {
+    Info infoX;
+    Info infoY;
+    Info infoZ;
+};
+
+struct Particle {
+    float startTime;
+    float life;
+    vec4 valuePosition;
+    vec4 valueScale;
+    InfoGroup infoPosition;
+    InfoGroup infoScale;
+    Info infoAlpha;
+};
+
+layout(std140, set = 0, binding = 0) uniform SimParams {
+    float time;
+    float minLife;
+    float maxLife;
+} params;
+
+layout(std140, set = 0, binding = 1) buffer ParticlesA {
+    Particle particles[PARTICLE_NUM];
+} particlesA;
+
+float rand(vec2 co)
+{
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
+const float PI = 3.141592653589793;
+const float HPI = PI * 0.5;
+const float PI2 = PI * 2;
+
+float calEasing(float n, float type)
+{
+    switch(int(type)) {
+        // linear
+        case 0 : break;
+        // QuintIn
+        case 1 : n = n * n * n * n * n; break;
+        // QuintOut
+        case 2 : n = ((n -= 1) * n * n * n * n) + 1; break;
+        // QuintInOut
+        case 3 : n = ((n = n * 2) < 1) ? n * n * n * n * n * 0.5 : 0.5 * ((n -= 2) * n * n * n * n + 2); break;
+        ////////////////////////
+        // BackIn
+        case 4 : n = n * n * (n * 1.70158 + n - 1.70158); break;
+        // BackOut
+        case 5 : n = (n -= 1) * n * (n * 1.70158 + n + 1.70158) + 1; break;
+        // BackInOut
+        case 6 : n = ((n = n * 2) < 1) ? 0.5 * n * n * (n * 1.70158 + n - 1.70158) : 0.5 * (n -= 2) * n * (n * 1.70158 + n + 1.70158) + 1; break;
+        ////////////////////////
+        // CircIn
+        case 7 : n = -1 * (sqrt(1 - n * n) - 1); break;
+        // CircOut
+        case 8 : n = sqrt(1 - (n -= 1) * n); break;
+        // CircInOut
+        case 9 : n = ((n = n * 2) < 1) ? -0.5 * (sqrt(1 - n * n) - 1) : 0.5 * sqrt(1 - (n -= 2) * n) + 0.5; break;
+        ////////////////////////
+        // CubicIn
+        case 10 : n = n * n * n; break;
+        // CubicOut
+        case 11 : n = ((n -= 1) * n * n) + 1; break;
+        // CubicInOut
+        case 12 : n = ((n = n * 2) < 1) ? n * n * n * 0.5 : 0.5 * ((n -= 2) * n * n + 2); break;
+        ////////////////////////
+        // ExpoIn
+        case 13 : n = n == 0.0 ? 0.0 : pow(2, 10 * (n - 1)); break;
+        // ExpoOut
+        case 14 : n = n == 1.0 ? 1.0 : -pow(2, -10 * n) + 1; break;
+        // ExpoInOut
+        case 15 : n = ((n = n * 2) < 1) ? (n == 0.0 ? 0.0 : 0.5 * pow(2, 10 * (n - 1))) : (n == 2.0 ? 1.0 : -0.5 * pow(2, -10 * (n - 1)) + 1); break;
+        ////////////////////////
+        // QuadIn
+        case 16 : n = n * n; break;
+        // QuadOut
+        case 17 : n = ((2 - n) * n); break;
+        // QuadInOut
+        case 18 : n = ((n = n * 2) < 1) ? n * n * 0.5 : 0.5 * ((2 - (n -= 1)) * n + 1); break;
+        ////////////////////////
+        // QuartIn
+        case 19 : n = n * n * n * n; break;
+        // QuartOut
+        case 20 : n = 1 - ((n -= 1) * n * n * n); break;
+        // QuartInOut
+        case 21 : n = ((n = n * 2) < 1) ? n * n * n * n * 0.5 : 1 - ((n -= 2) * n * n * n * 0.5); break;
+        ////////////////////////
+        // SineIn
+        case 22 : n = -cos(n * HPI) + 1; break;
+        // SineOut
+        case 23 : n = sin(n * HPI); break;
+        // SineInOut
+        case 24 : n = (-cos(n * PI) + 1) * 0.5; break;
+        ////////////////////////
+        // ElasticIn
+        case 25 : n = n == 0.0 ? 0.0 : n == 1.0 ? 1.0 : -1 * pow(2, 10 * (n -= 1)) * sin((n - 0.075) * (PI2) / 0.3); break;
+        // ElasticOut
+        case 26 : n = n == 0.0 ? 0.0 : n == 1.0 ? 1.0 : pow(2, -10 * n) * sin((n - 0.075) * (PI2) / 0.3) + 1; break;
+        // ElasticInOut
+        case 27 : n =( (n == 0.0 ? 0.0 : (n == 1.0 ? 1.0 : n *= 2)), (n < 1) ? -0.5 * pow(2, 10 * (n -= 1)) * sin((n - 0.075) * (PI2) / 0.3) : 0.5 * pow(2, -10 * (n -= 1)) * sin((n - 0.075) * (PI2) / 0.3) + 1); break;
+    }
+    return n;
+}
+
+void main() {
+    uint index = gl_GlobalInvocationID.x;
+    Particle targetParticle = particlesA.particles[index];
+
+    float n;
+    float age = params.time - targetParticle.startTime;
+    float lifeRatio = age/targetParticle.life;
+
+    if(lifeRatio>=1) {
+        particlesA.particles[index].startTime = params.time;
+        float t0 = rand(vec2(params.minLife,params.maxLife)+params.time)*params.maxLife;
+        t0 = max(params.minLife,t0);
+        particlesA.particles[index].life = t0;
+        lifeRatio = 0;
+    }
+
+    // position
+    n = lifeRatio;
+    n =  calEasing(n, targetParticle.infoPosition.infoX.easeType);
+    particlesA.particles[index].valuePosition.x = targetParticle.infoPosition.infoX.startValue +  (targetParticle.infoPosition.infoX.endValue - targetParticle.infoPosition.infoX.startValue) * n;
+    n = lifeRatio;
+    n =  calEasing(n, targetParticle.infoPosition.infoY.easeType);;
+    particlesA.particles[index].valuePosition.y = targetParticle.infoPosition.infoX.startValue +  (targetParticle.infoPosition.infoY.endValue - targetParticle.infoPosition.infoY.startValue) * n;
+    n = lifeRatio;
+    n =  calEasing(n, targetParticle.infoPosition.infoZ.easeType);;
+    particlesA.particles[index].valuePosition.z = targetParticle.infoPosition.infoX.startValue +  (targetParticle.infoPosition.infoZ.endValue - targetParticle.infoPosition.infoZ.startValue) * n;
+    
+    // scale
+    n = lifeRatio;
+    n =  calEasing(n, targetParticle.infoScale.infoX.easeType);;
+    particlesA.particles[index].valueScale.x = targetParticle.infoScale.infoX.startValue + (targetParticle.infoScale.infoX.endValue - targetParticle.infoScale.infoX.startValue) * n;
+    n = lifeRatio;
+    n =  calEasing(n, targetParticle.infoScale.infoY.easeType);;
+    particlesA.particles[index].valueScale.y = targetParticle.infoScale.infoY.startValue + (targetParticle.infoScale.infoY.endValue - targetParticle.infoScale.infoY.startValue) * n;
+    n = lifeRatio;
+    n =  calEasing(n, targetParticle.infoScale.infoZ.easeType);;
+    particlesA.particles[index].valueScale.z = targetParticle.infoScale.infoZ.startValue +  (targetParticle.infoScale.infoZ.endValue - targetParticle.infoScale.infoZ.startValue) * n;
+    
+    // alpha
+    n = lifeRatio;
+    n =  calEasing(n, targetParticle.infoAlpha.easeType);;
+    particlesA.particles[index].infoAlpha.value = targetParticle.infoAlpha.startValue +  (targetParticle.infoAlpha.endValue - targetParticle.infoAlpha.startValue) * n;
+}
