@@ -1,12 +1,12 @@
 #version 450
+#extension GL_EXT_samplerless_texture_functions : require
 
 // These should match the constants defined in deferred_rendering.c
 #define MAX_NUM_LIGHTS 1024
 
-layout(set=0, binding=0) uniform sampler mySampler;
-layout(set=0, binding=1) uniform texture2D gBufferPosition;
-layout(set=0, binding=2) uniform texture2D gBufferNormal;
-layout(set=0, binding=3) uniform texture2D gBufferAlbedo;
+layout(set=0, binding=0) uniform texture2D gBufferPosition;
+layout(set=0, binding=1) uniform texture2D gBufferNormal;
+layout(set=0, binding=2) uniform texture2D gBufferAlbedo;
 
 struct LightData {
   vec4 position;
@@ -29,16 +29,16 @@ layout(location = 0) out vec4 outColor;
 
 void main() {
     vec3 result = vec3(0.0, 0.0, 0.0);
-    vec2 c = gl_FragCoord.xy / surface.size;
+    ivec2 c = ivec2(gl_FragCoord.xy);
 
-    vec3 position = texture(sampler2D(gBufferPosition, mySampler), c).xyz;
+    vec3 position = texelFetch(gBufferPosition, c, 0).xyz;
 
     if (position.z > 10000.0) {
         discard;
     }
 
-    vec3 normal = texture(sampler2D(gBufferNormal, mySampler), c).xyz;
-    vec3 albedo = texture(sampler2D(gBufferAlbedo, mySampler), c).rgb;
+    vec3 normal = texelFetch(gBufferNormal, c, 0).xyz;
+    vec3 albedo = texelFetch(gBufferAlbedo, c, 0).rgb;
 
     for (uint i = 0; i < config.numLights; i++) {
         vec3 L = lightsBuffer.lights[i].position.xyz - position;
