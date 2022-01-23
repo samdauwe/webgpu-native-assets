@@ -13,5 +13,6 @@ layout (location = 0) out vec4 outFragColor;
 void main () 
 {
 	vec3 color = texture(sampler2D(textureGradientRamp, samplerGradientRamp), vec2(inGradientPos, 0.0)).rgb;
-	outFragColor.rgb = texture(sampler2D(textureColorMap, samplerColorMap), gl_PointCoord).rgb * color;
+	// outFragColor.rgb = texture(sampler2D(textureColorMap, samplerColorMap), gl_PointCoord).rgb * color;
+	outFragColor.rgb = color.rgb; // gl_PointCoord does not exist in WebGPU
 }
