@@ -32,7 +32,7 @@ layout (location = 0) out vec4 out_color;
 void main()
 {
     vec4 uFragColor = vec4(0.);
-    vec2 fragCoord = (frag_pos.xy/2.+vec2(0.5,0.5)); // 0-1 range to fit shadertoy
+    vec2 fragCoord = frag_pos.xy;
     fragCoord = floor(iResolution.xy*fragCoord);
     mainImage(uFragColor,fragCoord);
     out_color = uFragColor;
