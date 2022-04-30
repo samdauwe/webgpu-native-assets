@@ -1,47 +1,45 @@
-[[block]]  // Deprecated: [[block]] attributes have been removed from WGSL
 struct Uniforms {
-    elapsedTime: f32;
-    [[align(16)]] modelMatrix: mat4x4<f32>;  // Explicitly set alignment
-    viewProjectionMatrix: mat4x4<f32>;
-    cameraPosition: vec3<f32>;
+    elapsedTime: f32,
+    @align(16) modelMatrix: mat4x4<f32>,  // Explicitly set alignment
+    viewProjectionMatrix: mat4x4<f32>,
+    cameraPosition: vec3<f32>
 };
 
 struct GerstnerWaveParameters {
-    length: f32;  // 0 < L
-    amplitude: f32; // 0 < A
-    steepness: f32;  // Steepness of the peak of the wave. 0 <= S <= 1
-    [[size(16), align(8)]] direction: vec2<f32>;  // Normalized direction of the wave
+    length: f32,  // 0 < L
+    amplitude: f32, // 0 < A
+    steepness: f32,  // Steepness of the peak of the wave. 0 <= S <= 1
+    @size(16) @align(8) direction: vec2<f32>  // Normalized direction of the wave
 };
 
-[[block]]  // Deprecated: [[block]] attributes have been removed from WGSL
 struct GerstnerWavesUniforms {
-    waves: [[stride(32)]] array<GerstnerWaveParameters, 5>;
-    amplitudeSum: f32;  // Sum of waves amplitudes
+    waves: array<GerstnerWaveParameters, 5>,
+    amplitudeSum: f32  // Sum of waves amplitudes
 };
 
 struct VertexOutput {
-    [[builtin(position)]] position: vec4<f32>;
-    [[location(0)]] normal: vec4<f32>;
-    [[location(1)]] uv: vec2<f32>;
-    [[location(2)]] worldPosition: vec4<f32>;
+    @builtin(position) position: vec4<f32>,
+    @location(0) normal: vec4<f32>,
+    @location(1) uv: vec2<f32>,
+    @location(2) worldPosition: vec4<f32>
 };
 
-[[group(0), binding(0)]] var<uniform> uniforms: Uniforms;
-[[group(0), binding(1)]] var<uniform> wavesUniforms: GerstnerWavesUniforms;
+@group(0) @binding(0) var<uniform> uniforms: Uniforms;
+@group(0) @binding(1) var<uniform> wavesUniforms: GerstnerWavesUniforms;
 
-[[group(1), binding(0)]] var seaSampler: sampler;
-[[group(1), binding(1)]] var seaColor: texture_2d<f32>;
+@group(1) @binding(0) var seaSampler: sampler;
+@group(1) @binding(1) var seaColor: texture_2d<f32>;
 
 
 let pi = 3.14159;
 let gravity = 9.8; // m/sec^2
 let waveNumbers = 5;
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vertex_main(
-    [[location(0)]] position: vec3<f32>,
-    // [[location(1)]] normal: vec3<f32>,  // TODO: delete normals from plane geo
-    [[location(2)]] uv: vec2<f32>,
+    @location(0) position: vec3<f32>,
+    // @location(1) normal: vec3<f32>,  // TODO: delete normals from plane geo
+    @location(2) uv: vec2<f32>,
 ) -> VertexOutput {
     var output: VertexOutput;
     var worldPosition: vec4<f32> = uniforms.modelMatrix * vec4<f32>(position, 1.0);
@@ -85,10 +83,10 @@ fn vertex_main(
     return output;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn fragment_main(
     data: VertexOutput,
-) -> [[location(0)]] vec4<f32> {
+) -> @location(0) vec4<f32> {
     let lightColor = vec3<f32>(1.0, 0.8, 0.65);
     let skyColor = vec3<f32>(0.69, 0.84, 1.0);
 

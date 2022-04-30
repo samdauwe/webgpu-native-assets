@@ -4,18 +4,18 @@ let kWorkgroupSize = 64;
 let kDelta = 0.000025;
 let kSoftening = 0.2;
 
-[[block]]
+@block
 struct Float4Buffer {
-  data : array<vec4<f32>>;
+  data : array<vec4<f32>>
 };
 
-[[group(0), binding(0)]]
+@group(0) @binding(0)
 var<storage, read> positionsIn : Float4Buffer;
 
-[[group(0), binding(1)]]
+@group(0) @binding(1)
 var<storage, read_write> positionsOut : Float4Buffer;
 
-[[group(0), binding(2)]]
+@group(0) @binding(2)
 var<storage, read_write> velocities : Float4Buffer;
 
 fn computeForce(ipos : vec4<f32>,
@@ -28,9 +28,9 @@ fn computeForce(ipos : vec4<f32>,
   return coeff * d;
 }
 
-[[stage(compute), workgroup_size(kWorkgroupSize)]]
+@stage(compute) @workgroup_size(kWorkgroupSize)
 fn cs_main(
-  [[builtin(global_invocation_id)]] gid : vec3<u32>,
+  @builtin(global_invocation_id) gid : vec3<u32>,
   ) {
   let idx = gid.x;
   let pos = positionsIn.data[idx];
@@ -50,25 +50,25 @@ fn cs_main(
   positionsOut.data[idx] = pos + velocity * kDelta;
 }
 
-[[block]]
+@block
 struct RenderParams {
-  viewProjectionMatrix : mat4x4<f32>;
+  viewProjectionMatrix : mat4x4<f32>
 };
 
-[[group(0), binding(0)]]
+@group(0) @binding(0)
 var<uniform> renderParams : RenderParams;
 
 struct VertexOut {
-  [[builtin(position)]] position : vec4<f32>;
-  [[location(0)]] positionInQuad : vec2<f32>;
-  [[location(1), interpolate(flat)]] color : vec3<f32>;
+  @builtin(position) position : vec4<f32>,
+  @location(0) positionInQuad : vec2<f32>,
+  @location(1), interpolate(flat) color : vec3<f32>
 };
 
-[[stage(vertex)]]
+@stage(vertex)
 fn vs_main(
-  [[builtin(instance_index)]] idx : u32,
-  [[builtin(vertex_index)]] vertex : u32,
-  [[location(0)]] position : vec4<f32>,
+  @builtin(instance_index) idx : u32,
+  @builtin(vertex_index) vertex : u32,
+  @location(0) position : vec4<f32>,
   ) -> VertexOut {
 
   let kPointRadius = 0.005;
@@ -94,12 +94,12 @@ fn vs_main(
   return out;
 }
 
-[[stage(fragment)]]
+@stage(fragment)
 fn fs_main(
-  [[builtin(position)]] position : vec4<f32>,
-  [[location(0)]] positionInQuad : vec2<f32>,
-  [[location(1), interpolate(flat)]] color : vec3<f32>,
-  ) -> [[location(0)]] vec4<f32> {
+  @builtin(position) position : vec4<f32>,
+  @location(0) positionInQuad : vec2<f32>,
+  @location(1), interpolate(flat) color : vec3<f32>,
+  ) -> @location(0) vec4<f32> {
   // Calculate the normalized distance from this fragment to the quad center.
   let distFromCenter = length(positionInQuad);
 

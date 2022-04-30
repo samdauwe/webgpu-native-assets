@@ -1,37 +1,37 @@
-[[block]] struct Uniforms {
-    world           : mat4x4<f32>;
-    view            : mat4x4<f32>;
-    proj            : mat4x4<f32>;
-    screen_width    : f32;
-    screen_height   : f32;
+struct Uniforms {
+    world           : mat4x4<f32>,
+    view            : mat4x4<f32>,
+    proj            : mat4x4<f32>,
+    screen_width    : f32,
+    screen_height   : f32
 };
 
-[[block]] struct U32s {
-    values : [[stride(4)]] array<u32>;
+struct U32s {
+    values : array<u32>
 };
 
-[[block]] struct F32s {
-    values : [[stride(4)]] array<f32>;
+struct F32s {
+    values : array<f32>
 };
 
-[[binding(0), group(0)]] var<uniform> uniforms : Uniforms;
-[[binding(1), group(0)]] var<storage, read> positions : F32s;
-[[binding(2), group(0)]] var<storage, read> colors : U32s;
-[[binding(3), group(0)]] var<storage, read> indices : U32s;
+@binding(0) @group(0) var<uniform> uniforms : Uniforms;
+@binding(1) @group(0) var<storage, read> positions : F32s;
+@binding(2) @group(0) var<storage, read> colors : U32s;
+@binding(3) @group(0) var<storage, read> indices : U32s;
 
 struct VertexInput {
-    [[builtin(instance_index)]] instanceID : u32;
-    [[builtin(vertex_index)]] vertexID : u32;
+    @builtin(instance_index) instanceID : u32,
+    @builtin(vertex_index) vertexID : u32
 };
 
 struct VertexOutput {
-    [[builtin(position)]] position : vec4<f32>;
-    [[location(0)]] color : vec4<f32>;
+    @builtin(position) position : vec4<f32>,
+    @location(0) color : vec4<f32>
 };
 
 
 
-[[stage(vertex)]]
+@stage(vertex)
 fn main_vertex(vertex : VertexInput) -> VertexOutput {
 
     var lineWidth = 5.0;
@@ -63,10 +63,10 @@ fn main_vertex(vertex : VertexInput) -> VertexOutput {
 
     var position = start;
     var currElementIndex = startElementIndex;
-    if(localIndex == 0u || localIndex == 3u|| localIndex == 5u){
+    if (localIndex == 0u || localIndex == 3u|| localIndex == 5u){
         position = start;
         currElementIndex = startElementIndex;
-    }else{
+    } else{
         position = end;
         currElementIndex = endElementIndex;
     }
@@ -91,16 +91,16 @@ fn main_vertex(vertex : VertexInput) -> VertexOutput {
         var pxOffset = vec2<f32>(1.0, 0.0);
 
         // move vertices of quad sidewards
-        if(localIndex == 0u || localIndex == 1u || localIndex == 3u){
+        if (localIndex == 0u || localIndex == 1u || localIndex == 3u){
             pxOffset = vec2<f32>(dirScreen.y, -dirScreen.x);
-        }else{
+        } else{
             pxOffset = vec2<f32>(-dirScreen.y, dirScreen.x);
         }
 
         // move vertices of quad outwards
-        if(localIndex == 0u || localIndex == 3u || localIndex == 5u){
+        if (localIndex == 0u || localIndex == 3u || localIndex == 5u){
             pxOffset = pxOffset - dirScreen;
-        }else{
+        } else{
             pxOffset = pxOffset + dirScreen;
         }
 
@@ -126,14 +126,14 @@ fn main_vertex(vertex : VertexInput) -> VertexOutput {
 }
 
 struct FragmentInput {
-    [[location(0)]] color : vec4<f32>;
+    @location(0) color : vec4<f32>;
 };
 
 struct FragmentOutput {
-    [[location(0)]] color : vec4<f32>;
+    @location(0) color : vec4<f32>;
 };
 
-[[stage(fragment)]]
+@stage(fragment)
 fn main_fragment(fragment : FragmentInput) -> FragmentOutput {
 
     var output : FragmentOutput;
