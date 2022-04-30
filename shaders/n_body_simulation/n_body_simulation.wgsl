@@ -4,7 +4,6 @@ let kWorkgroupSize = 64;
 let kDelta = 0.000025;
 let kSoftening = 0.2;
 
-@block
 struct Float4Buffer {
   data : array<vec4<f32>>
 };
@@ -50,7 +49,6 @@ fn cs_main(
   positionsOut.data[idx] = pos + velocity * kDelta;
 }
 
-@block
 struct RenderParams {
   viewProjectionMatrix : mat4x4<f32>
 };
@@ -61,7 +59,7 @@ var<uniform> renderParams : RenderParams;
 struct VertexOut {
   @builtin(position) position : vec4<f32>,
   @location(0) positionInQuad : vec2<f32>,
-  @location(1), interpolate(flat) color : vec3<f32>
+  @location(1) @interpolate(flat) color : vec3<f32>
 };
 
 @stage(vertex)
@@ -98,7 +96,7 @@ fn vs_main(
 fn fs_main(
   @builtin(position) position : vec4<f32>,
   @location(0) positionInQuad : vec2<f32>,
-  @location(1), interpolate(flat) color : vec3<f32>,
+  @location(1) @interpolate(flat) color : vec3<f32>,
   ) -> @location(0) vec4<f32> {
   // Calculate the normalized distance from this fragment to the quad center.
   let distFromCenter = length(positionInQuad);
