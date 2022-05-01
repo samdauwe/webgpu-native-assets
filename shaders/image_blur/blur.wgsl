@@ -1,5 +1,5 @@
 struct Params {
-  filterDim : u32;
+  filterDim : u32,
   blockDim : u32;
 };
 
