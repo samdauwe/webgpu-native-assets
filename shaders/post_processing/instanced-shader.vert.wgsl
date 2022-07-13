@@ -1,7 +1,7 @@
 struct Camera {
   projectionMatrix: mat4x4<f32>,
   viewMatrix: mat4x4<f32>
-};
+}
 
 @group(0) @binding(0) 
 var<uniform> camera: Camera;
@@ -19,33 +19,33 @@ struct Input {
   @location(7) instanceNormalMatrix1: vec4<f32>,
   @location(8) instanceNormalMatrix2: vec4<f32>,
   @location(9) instanceNormalMatrix3: vec4<f32>
-};
+}
 
 struct Output {
   @builtin(position) Position: vec4<f32>,
   @location(0) normal: vec4<f32>,
   @location(1) pos: vec4<f32>
-};
+}
 
-@stage(vertex) 
+@vertex
 fn main (input: Input) -> Output {
   var output: Output;
 
-  let instanceModelMatrix: mat4x4<f32> = mat4x4<f32>(
+  var instanceModelMatrix: mat4x4<f32> = mat4x4<f32>(
     input.instanceModelMatrix0,
     input.instanceModelMatrix1,
     input.instanceModelMatrix2,
     input.instanceModelMatrix3
   );
 
-  let instanceModelInverseTransposeMatrix: mat4x4<f32> = mat4x4<f32>(
+  var instanceModelInverseTransposeMatrix: mat4x4<f32> = mat4x4<f32>(
     input.instanceNormalMatrix0,
     input.instanceNormalMatrix1,
     input.instanceNormalMatrix2,
     input.instanceNormalMatrix3
   );
 
-  let worldPosition: vec4<f32> = instanceModelMatrix * input.position;
+  var worldPosition: vec4<f32> = instanceModelMatrix * input.position;
 
   output.Position = camera.projectionMatrix *
                     camera.viewMatrix *
