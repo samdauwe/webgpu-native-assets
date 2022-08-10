@@ -19,34 +19,21 @@ struct ViewUniformsStruct {
 
 struct Inputs {
   @location(0) position: vec3<f32>,
-  @location(1) instanceMat0: vec4<f32>,
-  @location(2) instanceMat1: vec4<f32>,
-  @location(3) instanceMat2: vec4<f32>,
-  @location(4) instanceMat3: vec4<f32>,
+  @location(1) normal: vec3<f32>,
 }
 
 struct Output {
+  @location(0) normal: vec3<f32>,
   @builtin(position) position: vec4<f32>,
-  @location(0) localPosition: vec3<f32>,
 }
 
 @vertex
 fn main(input: Inputs) -> Output {
   var output: Output;
-
-  var instanceMatrix = mat4x4(
-    input.instanceMat0,
-    input.instanceMat1,
-    input.instanceMat2,
-    input.instanceMat3,
-  );
-
-  var worldPosition = vec4<f32>(input.position, 1.0);
   output.position = projection.matrix *
-                    view.matrix *
-                    instanceMatrix *
-                    worldPosition;
+                  view.matrix *
+                  vec4(input.position, 1.0);
 
-  output.localPosition = input.position;
+  output.normal = input.normal;
   return output;
 }
