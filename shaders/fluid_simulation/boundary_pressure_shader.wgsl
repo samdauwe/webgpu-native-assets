@@ -17,6 +17,7 @@ fn ID(x : f32, y : f32) -> u32 { return u32(x + y * uGrid.w); }
 @compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
 
+  // This code initialize the pos and index variables and target all cells
   var pos = vec2<f32>(global_id.xy);
 
   if (pos.x >= uGrid.w || pos.y >= uGrid.h) {
