@@ -54,6 +54,7 @@ fn vel_bilerp(x0 : f32, y0 : f32) -> vec2<f32> {
 @compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
 
+    // This code initialize the pos and index variables and target only interior cells
     var pos = vec2<f32>(global_id.xy);
 
     if (pos.x == 0 || pos.y == 0 || pos.x >= uGrid.dyeW - 1 || pos.y >= uGrid.dyeH - 1) {
