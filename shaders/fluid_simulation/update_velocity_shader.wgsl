@@ -27,9 +27,11 @@ struct Mouse {
 @group(0) @binding(11) var<uniform> uSymmetry : f32;
 
 fn ID(x : f32, y : f32) -> u32 { return u32(x + y * uGrid.w); }
+
 fn inBetween(x : f32, lower : f32, upper : f32) -> bool {
   return x > lower && x < upper;
 }
+
 fn inBounds(pos : vec2<f32>, xMin : f32, xMax : f32, yMin: f32, yMax : f32) -> bool {
   return inBetween(pos.x, xMin * uGrid.w, xMax * uGrid.w) && inBetween(pos.y, yMin * uGrid.h, yMax * uGrid.h);
 }
