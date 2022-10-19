@@ -12,6 +12,7 @@ struct Mouse {
   pos: vec2<f32>,
   vel: vec2<f32>,
 }
+
 @group(0) @binding(0) var<storage, read_write> x_in : array<f32>;
 @group(0) @binding(1) var<storage, read_write> y_in : array<f32>;
 @group(0) @binding(2) var<storage, read_write> z_in : array<f32>;
@@ -28,12 +29,15 @@ struct Mouse {
 @group(0) @binding(13) var<uniform> uSymmetry : f32;
 
 fn ID(x : f32, y : f32) -> u32 { return u32(x + y * uGrid.dyeW); }
+
 fn inBetween(x : f32, lower : f32, upper : f32) -> bool {
   return x > lower && x < upper;
 }
+
 fn inBounds(pos : vec2<f32>, xMin : f32, xMax : f32, yMin: f32, yMax : f32) -> bool {
   return inBetween(pos.x, xMin * uGrid.dyeW, xMax * uGrid.dyeW) && inBetween(pos.y, yMin * uGrid.dyeH, yMax * uGrid.dyeH);
 }
+
 // cosine based palette, 4 vec3 params
 fn palette(t : f32, a : vec3<f32>, b : vec3<f32>, c : vec3<f32>, d : vec3<f32> ) -> vec3<f32> {
     return a + b*cos( 6.28318*(c*t+d) );
