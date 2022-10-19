@@ -48,6 +48,7 @@ fn createSplat(pos : vec2<f32>, splatPos : vec2<f32>, vel : vec2<f32>, radius : 
 @compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
 
+    // This code initialize the pos and index variables and target only interior cells
     var pos = vec2<f32>(global_id.xy);
 
     if (pos.x == 0 || pos.y == 0 || pos.x >= uGrid.w - 1 || pos.y >= uGrid.h - 1) {
@@ -59,6 +60,7 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     let tmpT = uTime;
     var p = pos/vec2(uGrid.w, uGrid.h);
 
+    // This code initialize the pos and index variables and target all cells
     var m = uMouse.pos;
     var v = uMouse.vel*2.;
 
