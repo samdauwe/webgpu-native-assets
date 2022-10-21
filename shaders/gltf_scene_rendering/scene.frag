@@ -24,17 +24,17 @@ void main()
 {
 	vec4 color = texture(sampler2D(textureColorMap, samplerColorMap), inUV) * vec4(inColor, 1.0);
 
-	if (materialConsts.ALPHA_MASK) {
-		if (color.a < materialConsts.ALPHA_MASK_CUTOFF) {
-			discard;
-		}
-	}
-
 	vec3 N = normalize(inNormal);
 	vec3 T = normalize(inTangent.xyz);
 	vec3 B = cross(inNormal, inTangent.xyz) * inTangent.w;
 	mat3 TBN = mat3(T, B, N);
 	N = TBN * normalize(texture(sampler2D(textureNormalMap, samplerNormalMap), inUV).xyz * 2.0 - vec3(1.0));
+
+	if (materialConsts.ALPHA_MASK) {
+		if (color.a < materialConsts.ALPHA_MASK_CUTOFF) {
+			discard;
+		}
+	}
 
 	const float ambient = 0.1;
 	vec3 L = normalize(inLightVec);
