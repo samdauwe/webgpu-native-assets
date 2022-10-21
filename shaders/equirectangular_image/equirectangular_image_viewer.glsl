@@ -36,10 +36,9 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
     // radial azmuth polar
     vec2 texCoord = vec2(atan(rd.z, rd.x) + PI, acos(-rd.y)) / vec2(2.0 * PI, PI);
 
-    if (iVisualizeInput) {
-        fragCoord.y = iResolution.y - fragCoord.y;
-        fragColor = texture(sampler2D(iChannel0Texture, iChannel0TextureSampler), (fragCoord.xy/iResolution.xy));
-    } else {
-        fragColor = texture(sampler2D(iChannel0Texture, iChannel0TextureSampler), texCoord);
-    }
+    // Input visualization
+    fragCoord.y = iVisualizeInput ? iResolution.y - fragCoord.y : fragCoord.y;
+    texCoord = iVisualizeInput ? (fragCoord.xy/iResolution.xy) : texCoord;
+
+    fragColor = texture(sampler2D(iChannel0Texture, iChannel0TextureSampler), texCoord);
 }
