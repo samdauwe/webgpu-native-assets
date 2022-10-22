@@ -23,17 +23,18 @@ void main()
 
 	outFragColor = vec4(vec3(0.0), 1.);
 
-	if (gl_FrontFacing) 
+	// Only render mirrored scene on front facing (upper) side of mirror surface
+	vec4 reflection = vec4(0.0);
+	for (int x = -3; x <= 3; x++)
 	{
-		// Only render mirrored scene on front facing (upper) side of mirror surface
-		vec4 reflection = vec4(0.0);
-		for (int x = -3; x <= 3; x++)
+		for (int y = -3; y <= 3; y++)
 		{
-			for (int y = -3; y <= 3; y++)
-			{
-				reflection += texture(sampler2D(textureColor, samplerColor), vec2(projCoord.s + x * blurSize, projCoord.t + y * blurSize)) / 49.0;
-			}
+			reflection += texture(sampler2D(textureColor, samplerColor), vec2(projCoord.s + x * blurSize, projCoord.t + y * blurSize)) / 49.0;
 		}
+	}
+
+	if (gl_FrontFacing)
+	{
 		outFragColor += reflection;
-	};
+	}
 }
