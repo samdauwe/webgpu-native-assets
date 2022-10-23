@@ -13,12 +13,14 @@ layout (location = 0) out vec4 outFragColor;
 
 void main() 
 {
+	vec3 noLightCalcGlowColor = texture(sampler2D(textureGradientRamp, samplerGradientRamp), inUV).rgb;
+
 	// No light calculations for glow color 
 	// Use max. color channel value
 	// to detect bright glow emitters
 	if ((inColor.r >= 0.9) || (inColor.g >= 0.9) || (inColor.b >= 0.9)) 
 	{
-		outFragColor.rgb = texture(sampler2D(textureGradientRamp, samplerGradientRamp), inUV).rgb;
+		outFragColor.rgb = noLightCalcGlowColor;
 	}
 	else
 	{
@@ -29,6 +31,6 @@ void main()
 		vec4 IDiffuse = vec4(0.5, 0.5, 0.5, 0.5) * max(dot(inNormal, inLightVec), 0.0);
 		float specular = 0.25;
 		vec4 ISpecular = vec4(0.5, 0.5, 0.5, 1.0) * pow(max(dot(Reflected, Eye), 0.0), 4.0) * specular; 
-		outFragColor = vec4((IAmbient + IDiffuse) * vec4(inColor, 1.0) + ISpecular); 
+		outFragColor = vec4((IAmbient + IDiffuse) * vec4(inColor, 1.0) + ISpecular);
 	}
 }

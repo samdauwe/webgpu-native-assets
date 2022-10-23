@@ -10,10 +10,12 @@ layout (location = 0) out vec4 outFragColor;
 
 void main() 
 {
+	vec3 brightGlowEmittersColor = texture(sampler2D(textureGradientRamp, samplerGradientRamp), inUV).rgb;
+
 	// Use max. color channel value to detect bright glow emitters
 	if ((inColor.r >= 0.9) || (inColor.g >= 0.9) || (inColor.b >= 0.9)) 
 	{
-		outFragColor.rgb = texture(sampler2D(textureGradientRamp, samplerGradientRamp), inUV).rgb;
+		outFragColor.rgb = brightGlowEmittersColor;
 	}
 	else
 	{
