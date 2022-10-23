@@ -18,15 +18,19 @@ void main()
 {
     vec4 color = vec4(0);
 
+    vec4 color_1 = texture(sampler2D(textureColor, sampler_1), inUV, inLodBias);
+    vec4 color_2 = texture(sampler2D(textureColor, sampler_2), inUV, inLodBias);
+    vec4 color_3 = texture(sampler2D(textureColor, sampler_3), inUV, inLodBias);
+
     switch (inSamplerIndex) {
         case 0:
-            color = texture(sampler2D(textureColor, sampler_1), inUV, inLodBias);
+            color = color_1;
             break;
         case 1:
-            color = texture(sampler2D(textureColor, sampler_2), inUV, inLodBias);
+            color = color_2;
             break;
         case 2:
-            color = texture(sampler2D(textureColor, sampler_3), inUV, inLodBias);
+            color = color_3;
             break;
         default:
             break;
