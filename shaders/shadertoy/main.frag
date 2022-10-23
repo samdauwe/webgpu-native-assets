@@ -27,7 +27,7 @@ float iSampleRate = shader_inputs.u_SampleRate;
 
 layout (location = 0) out vec4 out_color;
 
-#include "cube_lines.glsl"
+#include "seascape.glsl"
 
 void main()
 {
