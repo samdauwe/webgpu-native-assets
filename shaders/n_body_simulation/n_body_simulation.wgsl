@@ -1,8 +1,8 @@
 // Simulation parameters.
-let kNumBodies = 8192;
-let kWorkgroupSize = 64;
-let kDelta = 0.000025;
-let kSoftening = 0.2;
+const kNumBodies = 8192;
+const kWorkgroupSize = 64;
+const kDelta = 0.000025;
+const kSoftening = 0.2;
 
 struct Float4Buffer {
   data : array<vec4<f32>>
@@ -20,19 +20,19 @@ var<storage, read_write> velocities : Float4Buffer;
 fn computeForce(ipos : vec4<f32>,
                 jpos : vec4<f32>,
                 ) -> vec4<f32> {
-  let d = vec4<f32>((jpos - ipos).xyz, 0.0);
-  let distSq = d.x*d.x + d.y*d.y + d.z*d.z + kSoftening*kSoftening;
-  let dist   = inverseSqrt(distSq);
-  let coeff  = jpos.w * (dist*dist*dist);
+  var d      = vec4<f32>((jpos - ipos).xyz, 0.0);
+  var distSq = d.x*d.x + d.y*d.y + d.z*d.z + kSoftening*kSoftening;
+  var dist   = inverseSqrt(distSq);
+  var coeff  = jpos.w * (dist*dist*dist);
   return coeff * d;
 }
 
-@stage(compute) @workgroup_size(kWorkgroupSize)
+@compute @workgroup_size(kWorkgroupSize)
 fn cs_main(
   @builtin(global_invocation_id) gid : vec3<u32>,
   ) {
-  let idx = gid.x;
-  let pos = positionsIn.data[idx];
+  var idx = gid.x;
+  var pos = positionsIn.data[idx];
 
   // Compute force.
   var force = vec4<f32>(0.0);
@@ -62,14 +62,14 @@ struct VertexOut {
   @location(1) @interpolate(flat) color : vec3<f32>
 };
 
-@stage(vertex)
+@vertex
 fn vs_main(
   @builtin(instance_index) idx : u32,
   @builtin(vertex_index) vertex : u32,
   @location(0) position : vec4<f32>,
   ) -> VertexOut {
 
-  let kPointRadius = 0.005;
+  const kPointRadius = 0.005;
   var vertexOffsets = array<vec2<f32>, 6>(
     vec2<f32>(1.0, -1.0),
     vec2<f32>(-1.0, -1.0),
@@ -78,7 +78,7 @@ fn vs_main(
     vec2<f32>(1.0, 1.0),
     vec2<f32>(1.0, -1.0),
   );
-  let offset = vertexOffsets[vertex];
+  var offset = vertexOffsets[vertex];
 
   var out : VertexOut;
   out.position = renderParams.viewProjectionMatrix *
@@ -92,20 +92,20 @@ fn vs_main(
   return out;
 }
 
-@stage(fragment)
+@fragment
 fn fs_main(
   @builtin(position) position : vec4<f32>,
   @location(0) positionInQuad : vec2<f32>,
   @location(1) @interpolate(flat) color : vec3<f32>,
   ) -> @location(0) vec4<f32> {
   // Calculate the normalized distance from this fragment to the quad center.
-  let distFromCenter = length(positionInQuad);
+  var distFromCenter = length(positionInQuad);
 
   // Discard fragments that are outside the circle.
   if (distFromCenter > 1.0) {
     discard;
   }
 
-  let intensity = 1.0 - distFromCenter;
+  var intensity = 1.0 - distFromCenter;
   return vec4<f32>(intensity*color, 1.0);
 }
