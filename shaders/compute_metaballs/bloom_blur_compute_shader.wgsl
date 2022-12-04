@@ -22,7 +22,7 @@ fn main(
   @builtin(local_invocation_id) LocalInvocationID : vec3<u32>
 ) {
   var filterOffset : u32 = (params.filterDim - 1u) / 2u;
-  var dims : vec2<i32> = textureDimensions(inputTex, 0);
+  var dims : vec2<i32> = vec2<i32>(textureDimensions(inputTex, 0));
 
   var baseIndex = vec2<i32>(
     WorkGroupID.xy * vec2<u32>(params.blockDim, 4u) +
