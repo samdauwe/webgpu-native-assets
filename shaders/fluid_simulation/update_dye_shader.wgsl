@@ -1,3 +1,4 @@
+// -- STRUCT_GRID_SIZE -- //
 struct GridSize {
   w : f32,
   h : f32,
@@ -7,15 +8,16 @@ struct GridSize {
   rdx : f32,
   dyeRdx : f32
 }
+// -- STRUCT_GRID_SIZE -- //
 
 struct Mouse {
   pos: vec2<f32>,
   vel: vec2<f32>,
 }
 
-@group(0) @binding(0) var<storage, read_write> x_in : array<f32>;
-@group(0) @binding(1) var<storage, read_write> y_in : array<f32>;
-@group(0) @binding(2) var<storage, read_write> z_in : array<f32>;
+@group(0) @binding(0) var<storage, read> x_in : array<f32>;
+@group(0) @binding(1) var<storage, read> y_in : array<f32>;
+@group(0) @binding(2) var<storage, read> z_in : array<f32>;
 @group(0) @binding(3) var<storage, read_write> x_out : array<f32>;
 @group(0) @binding(4) var<storage, read_write> y_out : array<f32>;
 @group(0) @binding(5) var<storage, read_write> z_out : array<f32>;
@@ -55,6 +57,7 @@ fn createSplat(pos : vec2<f32>, splatPos : vec2<f32>, vel : vec2<f32>, radius : 
 @compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
 
+    // -- COMPUTE_START_DYE -- //
     var pos = vec2<f32>(global_id.xy);
 
     if (pos.x == 0 || pos.y == 0 || pos.x >= uGrid.dyeW - 1 || pos.y >= uGrid.dyeH - 1) {
@@ -62,13 +65,19 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     }
 
     let index = ID(pos.x, pos.y);
+    // -- COMPUTE_START_DYE -- //
 
     // var col_start = palette(uTime/8., vec3(0.875, 0.516, 0.909), vec3(0.731, 0.232, 0.309), vec3(1.566, 0.088, 1.466), vec3(0.825, 5.786, 3.131));
     // var col_start = palette(uTime/8., vec3(0.383, 0.659, 0.770), vec3(0.322, 0.366, 0.089), vec3(1.132, 1.321, 0.726), vec3(6.241, 4.902, 1.295));
-    let col_start = palette(uTime/8., vec3(0.5), vec3(0.5), vec3(1), vec3(0.333, 0.667, 0.999));
+    // let col_start = palette(uTime/8., vec3(0.5), vec3(0.5), vec3(1), vec3(0.333, 0.667, 0.999));
+    let col_incr = 0.15;
+    let col_start = palette(uTime/8., vec3(1), vec3(0.5), vec3(1), vec3(0, col_incr, col_incr*2.));
+    // let col_start = vec3(1.+uTime*0.);
+    // let col_start = palette(uTime/8., vec3(${Math.random()}, ${Math.random()}, ${Math.random()}), vec3(${Math.random()}, ${Math.random()}, ${Math.random()}), vec3(${Math.random()}, ${Math.random()}, ${Math.random()}), vec3(${Math.random()}, ${Math.random()}, ${Math.random()}));
 
     var p = pos/vec2(uGrid.dyeW, uGrid.dyeH);
 
+    // -- SPLAT_CODE -- //
     var m = uMouse.pos;
     var v = uMouse.vel*2.;
 
@@ -76,10 +85,28 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     if (uSymmetry == 1. || uSymmetry == 3.) {splat += createSplat(p, vec2(1. - m.x, m.y), v * vec2(-1., 1.), uRadius);}
     if (uSymmetry == 2. || uSymmetry == 3.) {splat += createSplat(p, vec2(m.x, 1. - m.y), v * vec2(1., -1.), uRadius);}
     if (uSymmetry == 3. || uSymmetry == 4.) {splat += createSplat(p, vec2(1. - m.x, 1. - m.y), v * vec2(-1., -1.), uRadius);}
+    // -- SPLAT_CODE -- //
 
     splat *= col_start * uForce * uDt * 100.;
 
-    x_out[index] = x_in[index]*uDiffusion + splat.x;
-    y_out[index] = y_in[index]*uDiffusion + splat.y;
-    z_out[index] = z_in[index]*uDiffusion + splat.z;
+    x_out[index] = max(0., x_in[index]*uDiffusion + splat.x);
+    y_out[index] = max(0., y_in[index]*uDiffusion + splat.y);
+    z_out[index] = max(0., z_in[index]*uDiffusion + splat.z);
+
+    // x_out[index]  = x_in[index]*uDiffusion;
+    // y_out[index]  = y_in[index]*uDiffusion;
+    // z_out[index]  = z_in[index]*uDiffusion;
+
+    // var distt = distance(pos/vec2(uGrid.dyeW, uGrid.dyeH), m);
+    // var influenceRadius = 0.06;
+    // if(distt < influenceRadius) {
+    //   var density = ((influenceRadius - distt) / influenceRadius) * 0.004 * length(uMouse.vel)*5000.;
+    //   x_out[index] -= density;
+    //   y_out[index] -= density;
+    //   z_out[index] -= density;
+    // }
+
+    // x_out[index] = max(0., x_out[index]);
+    // y_out[index] = max(0., y_out[index]);
+    // z_out[index] = max(0., z_out[index]);
 }

@@ -1,3 +1,4 @@
+// -- STRUCT_GRID_SIZE -- //
 struct GridSize {
   w : f32,
   h : f32,
@@ -7,10 +8,11 @@ struct GridSize {
   rdx : f32,
   dyeRdx : f32
 }
+// -- STRUCT_GRID_SIZE -- //
 
-@group(0) @binding(0) var<storage, read_write> x_vel_in : array<f32>;
-@group(0) @binding(1) var<storage, read_write> y_vel_in : array<f32>;
-@group(0) @binding(2) var<storage, read_write> vorticity : array<f32>;
+@group(0) @binding(0) var<storage, read> x_vel_in : array<f32>;
+@group(0) @binding(1) var<storage, read> y_vel_in : array<f32>;
+@group(0) @binding(2) var<storage, read> vorticity : array<f32>;
 @group(0) @binding(3) var<storage, read_write> x_vel_out : array<f32>;
 @group(0) @binding(4) var<storage, read_write> y_vel_out : array<f32>;
 @group(0) @binding(5) var<uniform> uGrid : GridSize;
@@ -23,6 +25,7 @@ fn vort(x : f32, y : f32) -> f32 { let id = ID(x, y); return vorticity[id]; }
 @compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
 
+  // -- COMPUTE_START -- //
   var pos = vec2<f32>(global_id.xy);
 
   if (pos.x == 0 || pos.y == 0 || pos.x >= uGrid.w - 1 || pos.y >= uGrid.h - 1) {
@@ -30,6 +33,7 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
   }
 
   let index = ID(pos.x, pos.y);
+  // -- COMPUTE_START -- //
 
   let L = vort(pos.x - 1, pos.y);
   let R = vort(pos.x + 1, pos.y);

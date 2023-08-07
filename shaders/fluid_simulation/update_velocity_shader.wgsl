@@ -1,3 +1,4 @@
+// -- STRUCT_GRID_SIZE -- //
 struct GridSize {
   w : f32,
   h : f32,
@@ -7,14 +8,15 @@ struct GridSize {
   rdx : f32,
   dyeRdx : f32
 }
+// -- STRUCT_GRID_SIZE -- //
 
 struct Mouse {
   pos: vec2<f32>,
   vel: vec2<f32>,
 }
 
-@group(0) @binding(0) var<storage, read_write> x_in : array<f32>;
-@group(0) @binding(1) var<storage, read_write> y_in : array<f32>;
+@group(0) @binding(0) var<storage, read> x_in : array<f32>;
+@group(0) @binding(1) var<storage, read> y_in : array<f32>;
 @group(0) @binding(2) var<storage, read_write> x_out : array<f32>;
 @group(0) @binding(3) var<storage, read_write> y_out : array<f32>;
 @group(0) @binding(4) var<uniform> uGrid: GridSize;
@@ -48,6 +50,7 @@ fn createSplat(pos : vec2<f32>, splatPos : vec2<f32>, vel : vec2<f32>, radius : 
 @compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
 
+    // -- COMPUTE_START -- //
     // This code initialize the pos and index variables and target only interior cells
     var pos = vec2<f32>(global_id.xy);
 
@@ -56,11 +59,12 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     }
 
     let index = ID(pos.x, pos.y);
+    // -- COMPUTE_START -- //
 
     let tmpT = uTime;
     var p = pos/vec2(uGrid.w, uGrid.h);
-
-    // This code initialize the pos and index variables and target all cells
+    
+    // -- SPLAT_CODE -- //
     var m = uMouse.pos;
     var v = uMouse.vel*2.;
 
@@ -68,6 +72,7 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     if (uSymmetry == 1. || uSymmetry == 3.) {splat += createSplat(p, vec2(1. - m.x, m.y), v * vec2(-1., 1.), uRadius);}
     if (uSymmetry == 2. || uSymmetry == 3.) {splat += createSplat(p, vec2(m.x, 1. - m.y), v * vec2(1., -1.), uRadius);}
     if (uSymmetry == 3. || uSymmetry == 4.) {splat += createSplat(p, vec2(1. - m.x, 1. - m.y), v * vec2(-1., -1.), uRadius);}
+    // -- SPLAT_CODE -- //
 
     splat *= uForce * uDt * 200.;
 
